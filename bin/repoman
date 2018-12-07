@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+
+require 'repoman'
+
+C = Repoman::Context.new('/Users/tim/stelladot/config.json')
+C.repos.map do |repo|
+  Thread.new { puts repo.git_clone }
+end.map(&:value)
