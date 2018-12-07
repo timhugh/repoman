@@ -21,6 +21,13 @@ module Repoman
       end
     end
 
+    desc 'clone', 'clones any repos that don\'t already exist'
+    def clone
+      for_all_repos do |repo|
+        puts "#{repo.name} - #{repo.git_clone}"
+      end
+    end
+
     private
 
     def for_all_repos
