@@ -1,11 +1,10 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 
-require 'repoman'
+require 'bundler'
+Bundler.setup
 
-C = Repoman::Context.new('/Users/tim/stelladot/config.json')
-C.repos.map do |repo|
-  Thread.new { puts repo.git_clone }
-end.map(&:value)
+require 'repoman/cli'
+Repoman::CLI.start

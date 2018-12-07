@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'repoman/config'
+require 'repoman/repo'
+
 module Repoman
   class Context
     attr_reader :config, :repos

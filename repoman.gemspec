@@ -10,9 +10,15 @@ Gem::Specification.new do |s|
   s.description   = 'For managing git repositories'
   s.authors       = ['Tim Heuett']
   s.email         = 'tim.heuett@gmail.com'
-  s.files         = Dir["**/*"].select { |d| d =~ %r{^(README|bin/|data/|ext/|lib/|spec/|test/)} }
+  s.files         = Dir['**/*'].select { |d| d =~ %r{^(README|bin/|data/|ext/|lib/|spec/|test/)} }
   s.executables   = ['repoman']
   s.homepage      = ''
   s.require_paths = ['lib']
   s.license       = 'MIT'
+
+  s.add_dependency 'thor'
+
+  s.add_development_dependency 'bundler'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rubocop'
 end

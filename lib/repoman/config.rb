@@ -9,11 +9,11 @@ module Repoman
     end
 
     def root_path
-      config["root"]
+      config['root']
     end
 
     def repositories
-      config["repositories"]
+      config['repositories']
     end
 
     private
