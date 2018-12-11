@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     repoman (0.0.0)
-      colorize
-      thor
+      colorize (~> 0)
+      thor (~> 0)
 
 GEM
   remote: https://rubygems.org/

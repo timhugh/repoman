@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.license       = 'MIT'
 
-  s.add_dependency 'colorize'
-  s.add_dependency 'thor'
+  s.add_dependency 'colorize', '~> 0'
+  s.add_dependency 'thor', '~> 0'
 
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'rake'
