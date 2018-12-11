@@ -2,12 +2,14 @@ PATH
   remote: .
   specs:
     repoman (0.0.0)
+      colorize
       thor
 
 GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.0)
+    colorize (0.8.1)
     jaro_winkler (1.5.1)
     parallel (1.12.1)
     parser (2.5.3.0)
