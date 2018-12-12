@@ -4,16 +4,36 @@ require 'thor'
 require 'colorize'
 require 'tty-table'
 
-require 'repoman/version'
 require 'repoman/context'
+require 'repoman/version'
 
 module Repoman
   class CLI < Thor
     class_option :config, type: :string
 
-    desc 'version', 'prints the version'
-    def version
-      puts Repoman::VERSION
+    desc 'open', 'opens an editor in the specified repository'
+    def open(repo_name)
+      repo = context.repos.find do |repo|
+        repo.name == repo_name
+      end
+
+      if repo.nil?
+        puts 'unrecognized repository!'
+        exit 1
+      end
+
+      if !repo.exists_locally?
+        puts "#{repo.name} does not exist locally!"
+        puts "clone to #{repo.path} [Y/n]?"
+      elsif repo.dirty?
+        puts "#{repo.name} is currently on #{repo.branch}"
+        puts "status: #{repo.diff}"
+        puts "open editor or terminal [E/t]?"
+      elsif repo.branch != 'master'
+        puts "#{repo.name} is currently on #{repo.branch}"
+        puts "status: clean"
+        puts "switch to master [y/N]?"
+      end
     end
 
     desc 'status', 'prints git status of all repos'
@@ -30,7 +50,7 @@ module Repoman
 
           next if options[:skip_clean] && !repo.dirty?
 
-          t << [repo.path, colorize_branch(repo.branch.to_s), repo.diff]
+          t << [repo.path, colorize_branch(repo.branch), repo.diff]
         end
       end
       puts table.render(:basic, padding: [0, 4, 0, 0])
@@ -48,7 +68,7 @@ module Repoman
             next
           end
 
-          branch = repo.branch.to_s
+          branch = repo.branch
           next if branch == 'master' && options[:hide_master]
           t << [repo.path, colorize_branch(branch)]
         end
@@ -66,8 +86,15 @@ module Repoman
     desc 'clone', 'clones any repos that don\'t already exist'
     def clone
       for_all_repos do |repo|
+        next if repo.exists_locally?
+
         puts "#{repo.path} - #{repo.git_clone}"
       end
+    end
+
+    desc 'version', 'prints the version'
+    def version
+      puts Repoman::VERSION
     end
 
     private

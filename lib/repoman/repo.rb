@@ -20,7 +20,7 @@ module Repoman
     end
 
     def branch
-      git 'rev-parse --symbolic-full-name --abbrev-ref HEAD'
+      @branch ||= git 'rev-parse --symbolic-full-name --abbrev-ref HEAD'
     end
 
     def diff
@@ -32,35 +32,32 @@ module Repoman
     end
 
     def git_pull
-      git 'pull', silent: true
+      git 'pull'
     end
 
     def git_clone
-      git 'clone', silent: true
+      git 'clone'
     end
 
     private
 
-    def git(command, silent: false)
-      SysCall.new("git -C #{full_path} #{command}", silent: silent)
+    def git(command)
+      SysCall.exec("git -C #{full_path} #{command}")
     end
   end
 
-  class SysCall
-    def initialize(command, silent: false)
-      @command = command + ' 2>&1'
-      @command += ' > /dev/null' if silent
-
-      @output = `#{@command}`
-      @exit_code = $?
+  class SysCall < String
+    def self.exec(command)
+      command += ' 2>&1'
+      r = new `#{command}`.strip
+      r.exit_code = $?
+      r
     end
+
+    attr_accessor :exit_code
 
     def success?
       @exit_code.success?
-    end
-
-    def to_s
-      @output.strip
     end
   end
 end
