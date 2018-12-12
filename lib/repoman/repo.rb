@@ -36,7 +36,7 @@ module Repoman
     end
 
     def git_clone
-      git 'clone'
+      SysCall.exec("git clone #{remote} #{full_path}")
     end
 
     private
