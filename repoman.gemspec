@@ -10,10 +10,7 @@ Gem::Specification.new do |s|
   s.description   = 'For managing git repositories'
   s.authors       = ['Tim Heuett']
   s.email         = 'tim.heuett@gmail.com'
-  s.files         = Dir.glob("{bin,lib}/**/*")
-  s.executables   = ['repoman']
   s.homepage      = ''
-  s.require_paths = ['lib']
   s.license       = 'MIT'
 
   s.add_dependency 'colorize', '~> 0'
@@ -24,4 +21,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'byebug'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rubocop'
+
+  s.files         = Dir['README.md', 'lib/**/*']
+  s.executables   = ['repoman']
+  s.require_paths = ['lib']
 end

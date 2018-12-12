@@ -28,11 +28,11 @@ module Repoman
       elsif repo.dirty?
         puts "#{repo.name} is currently on #{repo.branch}"
         puts "status: #{repo.diff}"
-        puts "open editor or terminal [E/t]?"
+        puts 'open editor or terminal [E/t]?'
       elsif repo.branch != 'master'
         puts "#{repo.name} is currently on #{repo.branch}"
-        puts "status: clean"
-        puts "switch to master [y/N]?"
+        puts 'status: clean'
+        puts 'switch to master [y/N]?'
       end
     end
 
@@ -50,7 +50,7 @@ module Repoman
 
           next if options[:skip_clean] && !repo.dirty?
 
-          t << [repo.path, colorize_branch(repo.branch), repo.diff]
+          t << [repo.path, colorize_branch(repo.branch.to_s), repo.diff]
         end
       end
       puts table.render(:basic, padding: [0, 4, 0, 0])
@@ -70,7 +70,8 @@ module Repoman
 
           branch = repo.branch
           next if branch == 'master' && options[:hide_master]
-          t << [repo.path, colorize_branch(branch)]
+
+          t << [repo.path, colorize_branch(branch.to_s)]
         end
       end
       puts table.render(:basic, padding: [0, 4, 0, 0])

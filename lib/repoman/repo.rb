@@ -36,28 +36,30 @@ module Repoman
     end
 
     def git_clone
-      SysCall.exec("git clone #{remote} #{full_path}")
+      SysCall.new("git clone #{remote} #{full_path}")
     end
 
     private
 
     def git(command)
-      SysCall.exec("git -C #{full_path} #{command}")
+      SysCall.new("git -C #{full_path} #{command}")
     end
   end
 
-  class SysCall < String
-    def self.exec(command)
+  class SysCall
+    def initialize(command)
       command += ' 2>&1'
-      r = new `#{command}`.strip
-      r.exit_code = $?
-      r
-    end
 
-    attr_accessor :exit_code
+      @output = `#{command}`
+      @exit_code = $?
+    end
 
     def success?
       @exit_code.success?
+    end
+
+    def to_s
+      @output.strip
     end
   end
 end
