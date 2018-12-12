@@ -2,16 +2,21 @@
 
 module Repoman
   class Repo
-    attr_reader :name, :path, :remote
+    attr_reader :name, :path, :root_path, :remote
 
-    def initialize(name:, path:, remote:)
+    def initialize(name:, path:, root_path:, remote:)
       @name = name
       @path = path
+      @root_path = root_path
       @remote = remote
     end
 
+    def full_path
+      File.join(root_path, path)
+    end
+
     def exists_locally?
-      Dir.exist?(path)
+      Dir.exist?(full_path)
     end
 
     def branch
@@ -37,7 +42,7 @@ module Repoman
     private
 
     def git(command, silent: false)
-      SysCall.new("git -C #{path} #{command}", silent: silent)
+      SysCall.new("git -C #{full_path} #{command}", silent: silent)
     end
   end
 

@@ -18,7 +18,8 @@ module Repoman
       config.repositories.map do |repo|
         Repo.new(
           name: repo['name'],
-          path: File.join(config.root_path, repo['local']),
+          path: repo['local'],
+          root_path: config.root_path,
           remote: repo['remote']
         )
       end

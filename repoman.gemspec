@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'colorize', '~> 0'
   s.add_dependency 'thor', '~> 0'
+  s.add_dependency 'tty-table', '~> 0'
 
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'rake'

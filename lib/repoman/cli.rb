@@ -2,6 +2,7 @@
 
 require 'thor'
 require 'colorize'
+require 'tty-table'
 
 require 'repoman/version'
 require 'repoman/context'
@@ -19,40 +20,53 @@ module Repoman
     method_option :skip_clean, type: :boolean, default: true
     method_option :skip_uncloned, type: :boolean, default: true
     def status
-      for_all_repos do |repo|
-        unless repo.exists_locally?
-          raise "#{repo.name} does not exist locally!" unless options[:skip_uncloned]
+      table = TTY::Table.new do |t|
+        for_all_repos do |repo|
+          unless repo.exists_locally?
+            raise "#{repo.path} does not exist locally!" unless options[:skip_uncloned]
 
-          next
+            next
+          end
+
+          next if options[:skip_clean] && !repo.dirty?
+
+          t << [repo.path, colorize_branch(repo.branch.to_s), repo.diff]
         end
-
-        next if options[:skip_clean] && !repo.dirty?
-
-        puts "#{repo.name} (#{colorize_branch(repo.branch.to_s)}) - #{repo.diff}"
       end
+      puts table.render(:basic, padding: [0, 4, 0, 0])
     end
 
     desc 'branch', 'prints current branch of all repos'
     method_option :hide_master, type: :boolean, default: false
+    method_option :skip_uncloned, type: :boolean, default: true
     def branch
-      for_all_repos do |repo|
-        branch = repo.branch.to_s
-        next if branch == 'master' && options[:hide_master]
-        puts "#{repo.name} #{colorize_branch(branch)}"
+      table = TTY::Table.new do |t|
+        for_all_repos do |repo|
+          unless repo.exists_locally?
+            raise "#{repo.path} does not exist locally!" unless options[:skip_uncloned]
+
+            next
+          end
+
+          branch = repo.branch.to_s
+          next if branch == 'master' && options[:hide_master]
+          t << [repo.path, colorize_branch(branch)]
+        end
       end
+      puts table.render(:basic, padding: [0, 4, 0, 0])
     end
 
     desc 'pull', 'pulls latest commits for all repos'
     def pull
       for_all_repos do |repo|
-        puts "#{repo.name} - #{repo.git_pull}"
+        puts "#{repo.path} - #{repo.git_pull}"
       end
     end
 
     desc 'clone', 'clones any repos that don\'t already exist'
     def clone
       for_all_repos do |repo|
-        puts "#{repo.name} - #{repo.git_clone}"
+        puts "#{repo.path} - #{repo.git_clone}"
       end
     end
 
