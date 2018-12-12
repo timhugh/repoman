@@ -7,17 +7,38 @@ require 'repoman/version'
 require 'repoman/context'
 
 module Repoman
-  class Git < Thor
-    class_option :skip_clean, type: :boolean
+  class CLI < Thor
+    class_option :config, type: :string
+
+    desc 'version', 'prints the version'
+    def version
+      puts Repoman::VERSION
+    end
 
     desc 'status', 'prints git status of all repos'
+    method_option :skip_clean, type: :boolean, default: true
+    method_option :skip_uncloned, type: :boolean, default: true
     def status
       for_all_repos do |repo|
-        diff = repo.diff
-        next if diff == '' && skip_clean?
+        unless repo.exists_locally?
+          raise "#{repo.name} does not exist locally!" unless options[:skip_uncloned]
 
+          next
+        end
+
+        next if options[:skip_clean] && !repo.dirty?
+
+        puts "#{repo.name} (#{colorize_branch(repo.branch.to_s)}) - #{repo.diff}"
+      end
+    end
+
+    desc 'branch', 'prints current branch of all repos'
+    method_option :hide_master, type: :boolean, default: false
+    def branch
+      for_all_repos do |repo|
         branch = repo.branch.to_s
-        puts "#{repo.name} (#{branch == 'master' ? branch.green : branch.red}) - #{diff}"
+        next if branch == 'master' && options[:hide_master]
+        puts "#{repo.name} #{colorize_branch(branch)}"
       end
     end
 
@@ -49,26 +70,14 @@ module Repoman
       end.each(&:value)
     end
 
-    def skip_clean?
-      options[:skip_clean] != false
+    def colorize_branch(branch)
+      branch == 'master' ? branch.green : branch.red
     end
 
     def context
-      raise 'Must specify a config file!' unless (path = parent_options[:config] || ENV['REPOMAN_CONFIG'])
+      raise 'Must specify a config file!' unless (path = options[:config] || ENV['REPOMAN_CONFIG'])
 
       @context ||= Repoman::Context.new(path)
     end
-  end
-
-  class CLI < Thor
-    class_option :config, type: :string
-
-    desc 'version', 'prints the version'
-    def version
-      puts Repoman::VERSION
-    end
-
-    desc 'git', 'git-related tasks'
-    subcommand 'git', Git
   end
 end

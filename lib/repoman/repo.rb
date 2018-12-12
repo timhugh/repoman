@@ -10,20 +10,20 @@ module Repoman
       @remote = remote
     end
 
+    def exists_locally?
+      Dir.exist?(path)
+    end
+
     def branch
       git 'rev-parse --symbolic-full-name --abbrev-ref HEAD'
     end
 
-    def diff(short: true)
-      if short
-        git 'diff --shortstat'
-      else
-        git 'diff'
-      end
+    def diff
+      @diff ||= git 'diff --shortstat --exit-code'
     end
 
     def dirty?
-      !git('diff --exit-code', silent: true).success?
+      !diff.success?
     end
 
     def git_pull
@@ -43,8 +43,8 @@ module Repoman
 
   class SysCall
     def initialize(command, silent: false)
-      @command = command
-      @command += ' 2>&1 > /dev/null' if silent
+      @command = command + ' 2>&1'
+      @command += ' > /dev/null' if silent
 
       @output = `#{@command}`
       @exit_code = $?
