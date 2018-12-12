@@ -4,9 +4,6 @@ require 'thor'
 require 'colorize'
 require 'tty-table'
 
-require 'repoman/context'
-require 'repoman/version'
-
 module Repoman
   class CLI < Thor
     class_option :config, type: :string
@@ -41,7 +38,7 @@ module Repoman
     method_option :skip_uncloned, type: :boolean, default: true
     def status
       table = TTY::Table.new do |t|
-        for_all_repos do |repo|
+        repositories.each.with_concurrency do |repo|
           unless repo.exists_locally?
             raise "#{repo.path} does not exist locally!" unless options[:skip_uncloned]
 
@@ -61,7 +58,7 @@ module Repoman
     method_option :skip_uncloned, type: :boolean, default: true
     def branch
       table = TTY::Table.new do |t|
-        for_all_repos do |repo|
+        repositories.each.with_concurrency do |repo|
           unless repo.exists_locally?
             raise "#{repo.path} does not exist locally!" unless options[:skip_uncloned]
 
@@ -79,14 +76,14 @@ module Repoman
 
     desc 'pull', 'pulls latest commits for all repos'
     def pull
-      for_all_repos do |repo|
+      repositories.each do |repo|
         puts "#{repo.path} - #{repo.git_pull}"
       end
     end
 
     desc 'clone', 'clones any repos that don\'t already exist'
     def clone
-      for_all_repos do |repo|
+      repositories.each.with_concurrency do |repo|
         next if repo.exists_locally?
 
         puts "#{repo.path} - #{repo.git_clone}"
@@ -100,26 +97,16 @@ module Repoman
 
     private
 
-    def for_all_repos
-      for_repos(context.repos) do |repo|
-        yield repo
-      end
-    end
-
-    def for_repos(repos)
-      repos.map do |repo|
-        Thread.new { yield repo }
-      end.each(&:value)
-    end
-
     def colorize_branch(branch)
       branch == 'master' ? branch.green : branch.red
     end
 
-    def context
+    def repositories
+      return @repositories if @repositories
       raise 'Must specify a config file!' unless (path = options[:config] || ENV['REPOMAN_CONFIG'])
 
-      @context ||= Repoman::Context.new(path)
+      config = Config.new(path)
+      @repositories = RepositoryList.from_config(config)
     end
   end
 end

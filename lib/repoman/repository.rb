@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Repoman
-  class Repo
+  class Repository
     attr_reader :name, :path, :root_path, :remote
 
     def initialize(name:, path:, root_path:, remote:)
