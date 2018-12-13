@@ -35,31 +35,10 @@ module Repoman
       git 'pull'
     end
 
-    def git_clone
-      SysCall.new("git clone #{remote} #{full_path}")
-    end
-
     private
 
     def git(command)
-      SysCall.new("git -C #{full_path} #{command}")
-    end
-  end
-
-  class SysCall
-    def initialize(command)
-      command += ' 2>&1'
-
-      @output = `#{command}`
-      @exit_code = $?
-    end
-
-    def success?
-      @exit_code.success?
-    end
-
-    def to_s
-      @output.strip
+      Command.new("git -C #{full_path} #{command}")
     end
   end
 end

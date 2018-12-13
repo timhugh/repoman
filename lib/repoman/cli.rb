@@ -4,6 +4,12 @@ require 'thor'
 require 'colorize'
 require 'tty-table'
 
+require 'repoman/git'
+
+require 'repoman/version'
+require 'repoman/config'
+require 'repoman/repository_list'
+
 module Repoman
   class CLI < Thor
     class_option :config, type: :string
@@ -59,16 +65,11 @@ module Repoman
     def branch
       table = TTY::Table.new do |t|
         repositories.each.with_concurrency do |repo|
-          unless repo.exists_locally?
-            raise "#{repo.path} does not exist locally!" unless options[:skip_uncloned]
-
-            next
-          end
-
-          branch = repo.branch
+          branch = Git.branch(repo)
           next if branch == 'master' && options[:hide_master]
-
           t << [repo.path, colorize_branch(branch.to_s)]
+        rescue Git::DirectoryDoesNotExist => exception
+          raise unless options[:skip_uncloned]
         end
       end
       puts table.render(:basic, padding: [0, 4, 0, 0])
@@ -82,11 +83,13 @@ module Repoman
     end
 
     desc 'clone', 'clones any repos that don\'t already exist'
+    method_option :quiet, type: :boolean, default: true
     def clone
       repositories.each.with_concurrency do |repo|
-        next if repo.exists_locally?
-
-        puts "#{repo.path} - #{repo.git_clone}"
+        Git.clone(repo)
+        puts "Cloned #{repo.path}"
+      rescue Git::DirectoryExists
+        puts "Skip #{repo.path}" unless options[:quiet]
       end
     end
 

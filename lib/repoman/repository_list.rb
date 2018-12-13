@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'repoman/repository'
-
 module Repoman
   class RepositoryList < Array
     def self.from_config(config)
