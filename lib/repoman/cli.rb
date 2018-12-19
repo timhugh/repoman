@@ -16,9 +16,7 @@ module Repoman
 
     desc 'open', 'opens an editor in the specified repository'
     def open(repo_name)
-      repo = context.repos.find do |repo|
-        repo.name == repo_name
-      end
+      repo = repositories.find { |r| r.name == repo_name }
 
       if repo.nil?
         puts 'unrecognized repository!'
@@ -77,7 +75,7 @@ module Repoman
 
     desc 'pull', 'pulls latest commits for all repos'
     def pull
-      repositories.each do |repo|
+      repositories.each.with_concurrency do |repo|
         puts "#{repo.path} - #{repo.git_pull}"
       end
     end
